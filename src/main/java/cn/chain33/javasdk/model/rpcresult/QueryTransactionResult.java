@@ -1,12 +1,13 @@
 package cn.chain33.javasdk.model.rpcresult;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 public class QueryTransactionResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long amount;
+    private BigInteger amount;
 
     private TransactionResult tx;
 
@@ -39,11 +40,11 @@ public class QueryTransactionResult implements Serializable {
     }
 
 
-    public Long getAmount() {
+    public BigInteger getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(BigInteger amount) {
         this.amount = amount;
     }
 
