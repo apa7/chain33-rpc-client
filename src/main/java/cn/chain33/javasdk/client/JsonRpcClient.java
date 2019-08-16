@@ -26,6 +26,7 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -583,14 +584,14 @@ public class JsonRpcClient {
      * @param hashIdList 交易ID列表
      * @return 交易结果对象列表
      */
-    public List<QueryTransactionResult> getTxByHashes(List<String> hashIdList) {
-        if (hashIdList != null && !hashIdList.isEmpty()) {
+    public List<QueryTransactionResult> getTxByHashes(Collection<String> hashIdList) {
+        /*if (hashIdList != null && !hashIdList.isEmpty()) {
             for (int i = 0; i < hashIdList.size(); i++) {
                 String hash = hashIdList.get(i);
                 hash = HexUtil.removeHexHeader(hash);
                 hashIdList.set(i, hash);
             }
-        }
+        }*/
         QueryTxsResult txResult = (QueryTxsResult) invoke(RpcMethod.GET_TX_BY_HASHES, new TypeToken<RpcResult<QueryTxsResult>>() {
         }.getType(), new Pair<String, Object>("hashes", hashIdList));
         return txResult.getTxs();
