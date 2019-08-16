@@ -1,8 +1,8 @@
 # chain33-rpc-client
-调用chain33 rpc接口的java客户端;
-放弃原有sdk的alibaba.fastjson, 改用google.gson;
-在获取大量区块的时候性能提升了几倍;
-代码优化.
+调用chain33 rpc接口的java客户端;  
+放弃原有sdk的alibaba.fastjson, 改用google.gson;  
+在获取大量区块的时候性能提升了几倍;  
+代码优化.  
 
 注:本项目仅为学习和参考需要, 不涉及任何商业目的, 作者不承担代码使用后风险.
 
