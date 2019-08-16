@@ -4,6 +4,9 @@
 在获取大量区块的时候性能提升了几倍;
 代码优化.
 
+注:本项目仅为学习和参考需要, 不涉及任何商业目的, 作者不承担代码使用后风险.
+
+
 # 使用
 1.添加依赖
 ``` java
@@ -11,6 +14,12 @@
 	<groupId>cn.chain33</groupId>
 	<artifactId>rpc-client</artifactId>
 	<version>1.1.0</version>
+	<exclusions>
+	    <exclusion>
+	        <groupId>org.slf4j</groupId>
+	        <artifactId>slf4j-log4j12</artifactId>
+	    </exclusion>
+	</exclusions>
 </dependency>
 ```
 如果直接使用jar包,需要自己导入依赖的包
