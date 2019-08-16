@@ -6,8 +6,8 @@
 ``` java
 <dependency>
 	<groupId>cn.chain33</groupId>
-	<artifactId>sdk-java</artifactId>
-	<version>1.0.7</version>
+	<artifactId>rpc-client</artifactId>
+	<version>1.1.0</version>
 </dependency>
 ```
 如果直接使用jar包,需要自己导入依赖的包
@@ -26,10 +26,17 @@
 		</dependency>
 
 		<dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.2</version>
+        </dependency>
+
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.3</version>
 		</dependency>
+
 ```
 2.使用RpcClient调用接口
 
