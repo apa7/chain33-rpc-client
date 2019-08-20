@@ -3,6 +3,7 @@ package cn.chain33.javasdk.client;
 import cn.chain33.javasdk.model.enums.Execer;
 import cn.chain33.javasdk.model.enums.RpcMethod;
 import cn.chain33.javasdk.model.enums.SignType;
+import cn.chain33.javasdk.model.exception.Chain33Exception;
 import cn.chain33.javasdk.model.rpcresult.AccountAccResult;
 import cn.chain33.javasdk.model.rpcresult.AccountResult;
 import cn.chain33.javasdk.model.rpcresult.BlockItemsResult;
@@ -97,7 +98,7 @@ public class JsonRpcClient {
         return HttpUtil.httpPostBody(getUrl(), gson.toJson(postData));
     }
 
-    public Object invoke(String method, Type type, Pair... pairs) {
+    public Object invoke(String method, Type type, Pair... pairs) throws Chain33Exception {
         String httpPostResult = postData(method, pairs);
         if (StringUtil.isNotEmpty(httpPostResult)) {
             RpcResult result = gson.fromJson(httpPostResult, type);
@@ -106,13 +107,13 @@ public class JsonRpcClient {
                 return result.getResult();
             }
             logger.error("RPC请求失败，错误信息：" + result == null ? "" : result.getError() + " , 请求参数：" + pairs);
-            return result.getResult();
+            throw new Chain33Exception(result.getError());
         }
         logger.error("RPC请求失败，请求参数：" + pairs);
         return null;
     }
 
-    public Object invoke(RpcMethod rpcMethod, Type type, Pair... pairs) {
+    public Object invoke(RpcMethod rpcMethod, Type type, Pair... pairs) throws Chain33Exception {
         return invoke(rpcMethod.getMethod(), type, pairs);
     }
 
@@ -146,7 +147,7 @@ public class JsonRpcClient {
      *
      * @return Boolean
      */
-    public Boolean isSync() {
+    public Boolean isSync() throws Chain33Exception {
         return (Boolean) invoke(RpcMethod.BLOCKCHAIN_IS_SYNC, new TypeToken<RpcResult<Boolean>>() {
         }.getType());
     }
@@ -154,7 +155,7 @@ public class JsonRpcClient {
     /**
      * 8.1 获取钱包状态.
      */
-    public WalletStatusResult getWalletStatus() {
+    public WalletStatusResult getWalletStatus() throws Chain33Exception {
         return (WalletStatusResult) invoke(RpcMethod.GET_WALLET_STUATUS,
                                            new TypeToken<RpcResult<WalletStatusResult>>() {
                                            }.getType());
@@ -165,7 +166,7 @@ public class JsonRpcClient {
      *
      * @return BooleanResult
      */
-    public BooleanResult lock() {
+    public BooleanResult lock() throws Chain33Exception {
         return (BooleanResult) invoke(RpcMethod.LOCK_WALLET,
                                       new TypeToken<RpcResult<BooleanResult>>() {
                                       }.getType());
@@ -179,7 +180,7 @@ public class JsonRpcClient {
      * @param timeout        解锁时间，默认 0，表示永远解锁；非 0 值，表示超时之后继续锁住钱包，单位：秒。
      * @return BooleanResult
      */
-    public BooleanResult unlock(String passwd, boolean walletorticket, int timeout) {
+    public BooleanResult unlock(String passwd, boolean walletorticket, int timeout) throws Chain33Exception {
         return (BooleanResult) invoke(RpcMethod.UNLOCK_WALLET,
                                       new TypeToken<RpcResult<BooleanResult>>() {
                                       }.getType(),
@@ -194,7 +195,7 @@ public class JsonRpcClient {
      *
      * @param label
      */
-    public String newAccount(String label) {
+    public String newAccount(String label) throws Chain33Exception {
         AccountResult ar = (AccountResult) invoke(RpcMethod.NEW_ACCOUNT,
                                                   new TypeToken<RpcResult<AccountResult>>() {
                                                   }.getType(),
@@ -210,11 +211,11 @@ public class JsonRpcClient {
      * @param addresses 地址
      * @return List<AccountAccResult>
      */
-    public List<AccountAccResult> getBalance(Execer execer, String... addresses) {
+    public List<AccountAccResult> getBalance(Execer execer, String... addresses) throws Chain33Exception {
         return getBalance(execer, Arrays.asList(addresses));
     }
 
-    public BigInteger getBalance(String addr) {
+    public BigInteger getBalance(String addr) throws Chain33Exception {
         List<AccountAccResult> list = getBalance(Execer.COINS, addr);
         if (list == null || list.isEmpty()) {
             return BigInteger.ZERO;
@@ -223,7 +224,7 @@ public class JsonRpcClient {
     }
 
     @SuppressWarnings("unchecked")
-    public List<AccountAccResult> getBalance(Execer execer, List<String> addressList) {
+    public List<AccountAccResult> getBalance(Execer execer, List<String> addressList) throws Chain33Exception {
         return (List<AccountAccResult>) invoke(RpcMethod.GET_ACCOUNT_BALANCE,
                                                new TypeToken<RpcResult<List<AccountAccResult>>>() {
                                                }.getType(),
@@ -231,7 +232,7 @@ public class JsonRpcClient {
                                                new Pair<String, Object>("addresses", addressList));
     }
 
-    public BigInteger getTokenBalance(String tokenSymbol, String addr) {
+    public BigInteger getTokenBalance(String tokenSymbol, String addr) throws Chain33Exception {
         List<String> addrs = new ArrayList<>();
         addrs.add(addr);
         List<AccountAccResult> list = getTokenBalance(tokenSymbol, addrs);
@@ -241,7 +242,7 @@ public class JsonRpcClient {
         return list.get(0).getBalance();
     }
 
-    public List<AccountAccResult> getTokenBalance(String tokenSymbol, String... addresses) {
+    public List<AccountAccResult> getTokenBalance(String tokenSymbol, String... addresses) throws Chain33Exception {
         return getTokenBalance(tokenSymbol, Arrays.asList(addresses));
     }
 
@@ -250,7 +251,7 @@ public class JsonRpcClient {
      * 查询地址token余额.
      */
     @SuppressWarnings("unchecked")
-    public List<AccountAccResult> getTokenBalance(String tokenSymbol, List<String> addressList) {
+    public List<AccountAccResult> getTokenBalance(String tokenSymbol, List<String> addressList) throws Chain33Exception {
         return (List<AccountAccResult>) invoke(RpcMethod.GET_TOKEN_BALANCE,
                                                new TypeToken<RpcResult<List<AccountAccResult>>>() {
                                                }.getType(),
@@ -268,7 +269,7 @@ public class JsonRpcClient {
      * @param note   备注。
      * @return txhash
      */
-    public String sendToAddress(String from, String to, BigInteger amount, String note) {
+    public String sendToAddress(String from, String to, BigInteger amount, String note) throws Chain33Exception {
         TxResult txResult = (TxResult) invoke(RpcMethod.SEND_TO_ADDRESS,
                                               new TypeToken<RpcResult<TxResult>>() {
                                               }.getType(),
@@ -293,7 +294,7 @@ public class JsonRpcClient {
      * @param tokenSymbol: token标记符，最大长度是16个字符，且必须为大写字符。
      * @return txhash
      */
-    public String sendToAddress(String from, String to, BigInteger amount, String note, String tokenSymbol) {
+    public String sendToAddress(String from, String to, BigInteger amount, String note, String tokenSymbol) throws Chain33Exception {
         TxResult txResult = (TxResult) invoke(RpcMethod.SEND_TO_ADDRESS,
                                               new TypeToken<RpcResult<TxResult>>() {
                                               }.getType(),
@@ -315,7 +316,7 @@ public class JsonRpcClient {
      * @param tokenAppr Token审批人地址-配置的tokenApprs
      * @return txhash
      */
-    public String createToken(Token token, String tokenAppr) {
+    public String createToken(Token token, String tokenAppr) throws Chain33Exception {
         //1.预创建token
         String unsignData = createRawTokenPreCreateTx(token.getName(), token.getSymbol(), token.getIntroduction(), token.getOwner(), token.getTotal(), token.getPrice());
         String sign = signRawTx(token.getOwner(), unsignData, "60s", 2);
@@ -389,7 +390,7 @@ public class JsonRpcClient {
      * @param expire:  超时时间
      * @return
      */
-    public String createRawTransaction(String txHex, String payAddr, String Privkey, String expire) {
+    public String createRawTransaction(String txHex, String payAddr, String Privkey, String expire) throws Chain33Exception {
         String hash = (String) invoke(RpcMethod.TOKEN_CREATE_RAW_TX,
                                       new TypeToken<RpcResult<String>>() {
                                       }.getType(),
@@ -414,7 +415,7 @@ public class JsonRpcClient {
      * @return 交易十六进制编码后的字符串
      */
     public String createRawTokenPreCreateTx(String name, String symbol, String introduction, String ownerAddr,
-                                            BigInteger total, BigInteger price) {
+                                            BigInteger total, BigInteger price) throws Chain33Exception {
 
         String hex = (String) invoke(RpcMethod.TOKEN_CREATE_PRE_CREATE_TX,
                                      new TypeToken<RpcResult<String>>() {
@@ -437,7 +438,7 @@ public class JsonRpcClient {
      * @param fee:       交易的手续费
      * @return 交易十六进制编码后的字符串
      */
-    public String createRawTokenFinishTx(BigInteger fee, String symbol, String ownerAddr) {
+    public String createRawTokenFinishTx(BigInteger fee, String symbol, String ownerAddr) throws Chain33Exception {
         String txdata = (String) invoke(RpcMethod.TOKEN_CREATE_FINISH_TX,
                                         new TypeToken<RpcResult<String>>() {
                                         }.getType(),
@@ -448,7 +449,7 @@ public class JsonRpcClient {
         return txdata;
     }
 
-    public String createRawTokenFinishTx(String symbol, String ownerAddr) {
+    public String createRawTokenFinishTx(String symbol, String ownerAddr) throws Chain33Exception {
         String txdata = (String) invoke(RpcMethod.TOKEN_CREATE_FINISH_TX,
                                         new TypeToken<RpcResult<String>>() {
                                         }.getType(),
@@ -464,7 +465,7 @@ public class JsonRpcClient {
      * @param status 0=预创建,1=已创建;
      * @return List<Token>
      */
-    public List<Token> getTokens(int status, boolean queryAll, boolean symbolOnly) {
+    public List<Token> getTokens(int status, boolean queryAll, boolean symbolOnly) throws Chain33Exception {
         TokenResult tokenResult = (TokenResult) invoke(RpcMethod.QUERY, new TypeToken<RpcResult<TokenResult>>() {
                                                        }.getType(),
                                                        new Pair<String, Object>("execer", Execer.TOKEN.getName()),
@@ -479,7 +480,7 @@ public class JsonRpcClient {
      *
      * @return
      */
-    public Token getTokenInfo(String symbol) {
+    public Token getTokenInfo(String symbol) throws Chain33Exception {
         return (Token) invoke(RpcMethod.QUERY, new TypeToken<RpcResult<Token>>() {
                               }.getType(),
                               new Pair<String, Object>("execer", Execer.TOKEN.getName()),
@@ -499,7 +500,7 @@ public class JsonRpcClient {
      * @param index  固定填写2(这里是一个交易组，第1笔none的交易已经用pay address签过名了，此处签index=2的交易)
      * @return sign
      */
-    public String signRawTx(String addr, String txhex, String expire, int index) {
+    public String signRawTx(String addr, String txhex, String expire, int index) throws Chain33Exception {
         String signResult = (String) invoke(RpcMethod.SIGN_RAW_TRANSACTION,
                                             new TypeToken<RpcResult<String>>() {
                                             }.getType(),
@@ -519,7 +520,7 @@ public class JsonRpcClient {
      * @param txhex 上一步CreateNoBalanceTransaction生成的tx
      * @return sign
      */
-    public String signRawTx(String addr, String txhex) {
+    public String signRawTx(String addr, String txhex) throws Chain33Exception {
         return (String) invoke(RpcMethod.SIGN_RAW_TRANSACTION,
                                new TypeToken<RpcResult<String>>() {
                                }.getType(),
@@ -537,7 +538,7 @@ public class JsonRpcClient {
      * @param signType 签名类型
      * @return txHash
      */
-    public String submitRawTransaction(String unsignTx, String sign, String pubkey, SignType signType) {
+    public String submitRawTransaction(String unsignTx, String sign, String pubkey, SignType signType) throws Chain33Exception {
         return (String) invoke(RpcMethod.SEND_RAW_TRANSACTION,
                                new TypeToken<RpcResult<String>>() {
                                }.getType(),
@@ -554,7 +555,7 @@ public class JsonRpcClient {
      * @param data 交易数据
      * @return txHash
      */
-    public String sendTransaction(String data) {
+    public String sendTransaction(String data) throws Chain33Exception {
         return (String) invoke(RpcMethod.SEND_TRANSACTION,
                                new TypeToken<RpcResult<String>>() {
                                }.getType(),
@@ -568,7 +569,7 @@ public class JsonRpcClient {
      *
      * @param hash 交易hash
      */
-    public QueryTransactionResult getTxByHash(String hash) {
+    public QueryTransactionResult getTxByHash(String hash) throws Chain33Exception {
         if (StringUtil.isNotEmpty(hash) && hash.startsWith("0x")) {
             hash = HexUtil.removeHexHeader(hash);
         }
@@ -584,7 +585,7 @@ public class JsonRpcClient {
      * @param hashIdList 交易ID列表
      * @return 交易结果对象列表
      */
-    public List<QueryTransactionResult> getTxByHashes(Collection<String> hashIdList) {
+    public List<QueryTransactionResult> getTxByHashes(Collection<String> hashIdList) throws Chain33Exception {
         /*if (hashIdList != null && !hashIdList.isEmpty()) {
             for (int i = 0; i < hashIdList.size(); i++) {
                 String hash = hashIdList.get(i);
@@ -627,7 +628,7 @@ public class JsonRpcClient {
      * @param end      区块结束高度
      * @param isDetail 是否获取详情
      */
-    public List<BlocksResult> getBlocks(Long start, Long end, boolean isDetail) {
+    public List<BlocksResult> getBlocks(Long start, Long end, boolean isDetail) throws Chain33Exception {
         BlockItemsResult blockItemsResult = (BlockItemsResult) invoke(RpcMethod.GET_BLOCKS,
                                                                       new TypeToken<RpcResult<BlockItemsResult>>() {
                                                                       }.getType(),
@@ -645,7 +646,7 @@ public class JsonRpcClient {
      *
      * @return 最新区块信息
      */
-    public BlockResult getLastHeader() {
+    public BlockResult getLastHeader() throws Chain33Exception {
         return (BlockResult) invoke(RpcMethod.GET_LAST_HEADER,
                                     new TypeToken<RpcResult<BlockResult>>() {
                                     }.getType());
